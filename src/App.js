@@ -3,7 +3,7 @@ import './App.css';
 import React from 'react';
 import { Switch, Route, NavLink } from 'react-router-dom';
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs} from 'firebase/firestore';
+import { getFirestore, collection, getDocs, addDoc } from 'firebase/firestore';
 import Home from './pages/Home';
 import CreateEvent from './pages/CreateEvent';
 import NearbyEvents from './pages/NearbyEvents';
@@ -55,6 +55,12 @@ getEvents = async () => {
   })
 }
 
+createEvent = async newEvent => {
+  const eventsCollection = collection(db, 'Events');
+  await addDoc(eventsCollection, newEvent);
+  this.getEvents();
+}
+
 render(){
   return (
     <div className="App">
@@ -73,7 +79,7 @@ render(){
           <Home events={this.state.events} />
         </Route>
         <Route exact path='/add-event'>
-          <CreateEvent />
+          <CreateEvent createEvent={this.createEvent} />
         </Route>
         <Route exact path='/events-near-me'>
           <NearbyEvents />
