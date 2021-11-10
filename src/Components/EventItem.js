@@ -1,7 +1,7 @@
 import React from 'react';
 
 const EventItem = (props) => {
-  const eventList = props.eventProps.map(eventItem => {
+  const eventList = props.events.map(eventItem => {
     return(
       <li key={eventItem.id} className='list-group-item'>
         <div className='list-inline-item'>

@@ -4,7 +4,10 @@ import React from 'react';
 import { Switch, Route, NavLink } from 'react-router-dom';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, getDocs} from 'firebase/firestore';
-import EventItem from './pages/EventItem';
+import Home from './pages/Home';
+import CreateEvent from './pages/CreateEvent';
+import NearbyEvents from './pages/NearbyEvents';
+import EventItem from './Components/EventItem';
 
 const firebaseConfig = {
   apiKey: "AIzaSyCBerhVvYqX_oITGaqgzbYhtT01AoprpzE",
@@ -55,8 +58,28 @@ getEvents = async () => {
 render(){
   return (
     <div className="App">
-      <h4>My calendar</h4>
-      <EventItem eventProps={this.state.events}/>
+    <header className="App-header">
+      <div className="nav-home">
+        <NavLink exact to='/'>MY CALENDAR</NavLink>
+      </div>
+      <nav>
+        <NavLink exact to='/add-event'>CREATE EVENT</NavLink>
+        <NavLink exact to='/events-near-me'>EVENTS NEAR ME</NavLink>
+      </nav>
+    </header>
+      <main>
+      <Switch>
+        <Route exact path='/'>
+          <Home events={this.state.events} />
+        </Route>
+        <Route exact path='/add-event'>
+          <CreateEvent />
+        </Route>
+        <Route exact path='/events-near-me'>
+          <NearbyEvents />
+        </Route>
+      </Switch>
+      </main>
     </div>
   );
 }
