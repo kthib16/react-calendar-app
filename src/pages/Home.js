@@ -6,7 +6,7 @@ export default class Home extends React.Component {
     return (
       <main>
       <h4>My calendar</h4>
-      <EventItem events={this.props.events} />
+      <EventItem events={this.props.events} removeEvent={this.props.removeEvent}/>
       </main>
     )
   }

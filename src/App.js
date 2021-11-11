@@ -3,7 +3,7 @@ import './App.css';
 import React from 'react';
 import { Switch, Route, NavLink } from 'react-router-dom';
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs, addDoc } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore';
 import Home from './pages/Home';
 import CreateEvent from './pages/CreateEvent';
 import NearbyEvents from './pages/NearbyEvents';
@@ -21,6 +21,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db= getFirestore(app);
+
 
 export default class App extends React.Component {
 state = {
@@ -57,7 +58,18 @@ getEvents = async () => {
 
 createEvent = async newEvent => {
   const eventsCollection = collection(db, 'Events');
+
   await addDoc(eventsCollection, newEvent);
+  this.props.history.push('/');
+  this.getEvents();
+}
+
+removeEvent = async eventId => {
+  const eventsCollection = collection(db, 'Events');
+
+  const eventDoc = doc(eventsCollection, eventId);
+  await deleteDoc(eventDoc);
+  this.props.history.push('/');
   this.getEvents();
 }
 
@@ -76,7 +88,7 @@ render(){
       <main>
       <Switch>
         <Route exact path='/'>
-          <Home events={this.state.events} />
+          <Home events={this.state.events} removeEvent={this.removeEvent}/>
         </Route>
         <Route exact path='/add-event'>
           <CreateEvent createEvent={this.createEvent} />

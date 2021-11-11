@@ -8,8 +8,12 @@ const EventItem = (props) => {
           {eventItem.eventName}
         </div>
         <div className='list-inline-item float-right'>
+        <button className="btn">
           <i className='fas fa-edit'></i>
+        </button>
+        <button className='btn' onClick={() => props.removeEvent(eventItem.id)}>
           <i className='fas fa-trash'></i>
+        </button>
         </div>
       </li>
     )
