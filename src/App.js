@@ -7,7 +7,6 @@ import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc } from 'fireb
 import Home from './pages/Home';
 import CreateEvent from './pages/CreateEvent';
 import NearbyEvents from './pages/NearbyEvents';
-import EventItem from './Components/EventItem';
 
 const firebaseConfig = {
   apiKey: "AIzaSyCBerhVvYqX_oITGaqgzbYhtT01AoprpzE",
