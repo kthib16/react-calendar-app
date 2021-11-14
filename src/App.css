@@ -65,8 +65,22 @@ main{
   margin: 15px 15px 0px 15px;
 }
 
+
+
 .card{
-  width: 12rem;
+  width: 20rem;
+  height: 20rem;
   display: inline-block;
   margin: 0px 5px 5px 5px;
+  vertical-align: top;
+}
+
+.card-img-top{
+  height: 10rem;
+  object-fit: cover;
+}
+
+.event-details-img{
+  margin: 0px 15px 0px 15px;
+  max-width: 500px;
 }

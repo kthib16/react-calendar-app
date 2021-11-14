@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 
 export default class NearbyEvents extends Component {
 
@@ -17,12 +18,67 @@ getEvents = zip => {
     return response.json();
   })
   .then(parsedResponse => {
-    this.setState({
-      events: parsedResponse._embedded.events
+    const sortedArr = parsedResponse._embedded.events.sort(function(a,b){return new Date(a.dates.start.dateTime) - new Date(b.dates.start.dateTime)});
+    console.log('sorted', sortedArr)
+    sortedArr.forEach(eventItem => {
+      const date = eventItem.dates.start.localDate.split('-')
+      let month =''
+      if(date[1] === '01') {
+        month = 'January'
+      }
+      else if(date[1] === '02'){
+        month='February'
+      }
+      else if(date[1] === '03'){
+        month='March'
+      }
+      else if(date[1] === '04'){
+        month='April'
+      }
+      else if(date[1] === '05'){
+        month='May'
+      }
+      else if(date[1] === '06'){
+        month='June'
+      }
+      else if(date[1] === '07'){
+        month='July'
+      }
+      else if(date[1] === '08'){
+        month='August'
+      }
+      else if(date[1] === '09'){
+        month='September'
+      }
+      else if(date[1] === '10'){
+        month='October'
+      }
+      else if(date[1] === '11'){
+        month='November'
+      }
+      else if(date[1] === '12'){
+        month='December'
+      }
+
+      const newEventObj={
+          id: eventItem.id,
+          date: date[2],
+          month: month,
+          year: date[0],
+          eventName: eventItem.name,
+          image: eventItem.images[2].url,
+          isGoing: false
+
+      }
+
+      this.setState({
+        events: [...this.state.events, newEventObj]
     })
-  })
+  })})
   .catch(error=>console.log('error', error))
 }
+
+
 
 
   render(){
@@ -30,57 +86,19 @@ getEvents = zip => {
       <div>
       <h4>Nearby Events</h4>
       <div className='container'>
-          {this.state.events.map(event => {
-            // const date = event.dates.start.localDate.split('-')
-            // let month =''
-            // if(date[1] === '1') {
-            //   month = 'January'
-            // }
-            // else if(date[1] === '2'){
-            //   month='February'
-            // }
-            // else if(date[1] === '3'){
-            //   month='March'
-            // }
-            // else if(date[1] === '4'){
-            //   month='April'
-            // }
-            // else if(date[1] === '5'){
-            //   month='May'
-            // }
-            // else if(date[1] === '6'){
-            //   month='June'
-            // }
-            // else if(date[1] === '7'){
-            //   month='July'
-            // }
-            // else if(date[1] === '8'){
-            //   month='August'
-            // }
-            // else if(date[1] === '9'){
-            //   month='September'
-            // }
-            // else if(date[1] === '10'){
-            //   month='October'
-            // }
-            // else if(date[1] === '11'){
-            //   month='November'
-            // }
-            // else if(date[1] === '12'){
-            //   month='December'
-            // }
-            // console.log(typeof date[1])
-            // let formattedDate= `${month} ${date[2]}, ${date[0]}`
+          {this.state.events.map(eventItem => {
+
               return(
+                    <div key={eventItem.id}  className="card">
+                    <Link to={{pathname: `/event/${eventItem.id}`, state: { eventItem: eventItem } } } >
 
-                    <div key={event.id}  className="card">
-                      <img className="card-img-top" src={event.images[0].url} alt={event.name} />
+                      <img className="card-img-top" src={eventItem.image} alt={eventItem.eventName} />
                       <div className="card-body">
-                        <h5 className="card-title">{event.name}</h5>
-                        <p className="card-text">{event.dates.start.localDate}</p>
+                        <h5 className="card-title">{eventItem.eventName}</h5>
+                        <p className="card-text">{eventItem.month} {eventItem.date}, {eventItem.year}</p>
                       </div>
-                    </div>
-
+                  </Link>
+                  </div>
                     )
                   })}
                   </div>

@@ -1,19 +1,23 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const EventItem = (props) => {
   const eventList = props.events.map(eventItem => {
     return(
+
       <li key={eventItem.id} className='list-group-item'>
+      <Link to={{pathname: `/event/${eventItem.id}`, state: { eventItem: eventItem } } } >
         <div className='list-inline-item'>
           {eventItem.eventName}
         </div>
+        </Link>
         <div className='list-inline-item float-right'>
-        <button className="btn">
-          <i className='fas fa-edit'></i>
-        </button>
-        <button className='btn' onClick={() => props.removeEvent(eventItem.id)}>
-          <i className='fas fa-trash'></i>
-        </button>
+        <Link to={{pathname: `/edit-event/${eventItem.id}`, state: { eventItem: eventItem }}} >
+            <i className='fas fa-edit'></i>
+        </Link>
+          <button className='btn' onClick={() => props.removeEvent(eventItem.id)}>
+            <i className='fas fa-trash'></i>
+            </button>
         </div>
       </li>
     )

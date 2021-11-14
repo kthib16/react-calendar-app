@@ -1,45 +1,41 @@
-import React, { Component } from 'react';
+import React from 'react';
 
-export default class CreateEvent extends Component {
-  state = {
-  }
+export default class EditEvent extends React.Component{
 
-handleChange = e =>{
+state={
+  formData: this.props.location.state.eventItem
+
+};
+
+handleChange= e =>{
   this.setState({
-    [e.target.name]: e.target.value
+    formData: {
+      ...this.state.formData,
+      [e.target.name]: e.target.value
+    }
   })
-}
+};
 
 handleSubmit = e => {
   e.preventDefault();
-  const newEventObj = {
-    date: parseInt(this.state.date),
-    month: this.state.month,
-    year: parseInt(this.state.year),
-    eventName: this.state.eventName,
-    isGoing: true,
-    locationCity: this.state.locationCity,
-    locationState: this.state.locationState
-  }
 
-  this.props.createEvent(newEventObj);
-}
+  this.props.updateEvent(this.state.formData);
+};
 
+render(){
 
-  render() {
     return(
       <main>
-      <form>
-        <div className='form-group'>
-          <input onChange={this.handleChange} value={this.state.eventName} name="eventName" placeholder="Enter Event Name" className="form-control form-control-lg"/>
+      <form >
+        <div className='form-group' >
+          <input onChange={this.handleChange} value={this.state.formData.eventName} name="eventName" placeholder="Enter Event Name" className="form-control form-control-lg"/>
         </div>
-        <div className='form-row form-group'>
+        <div className="form-row form-group">
           <div className='col-md-6'>
-            <input onChange={this.handleChange} value={this.state.locationCity} name="locationCity" type="text" placeholder="Enter City" className='form-control' />
+            <input onChange={this.handleChange} value={this.state.formData.locationCity} name="locationCity" type="text" placeholder="Enter City" className='form-control' />
           </div>
           <div className='col-md-6'>
-          <select onChange={this.handleChange} name="locationState" className='form-control'>
-                  <option>Select state...</option>
+          <select onChange={this.handleChange} value={this.state.formData.locationState} name="locationState" className='form-control'>
                   <option>Alabama</option>
                   <option>Alaska</option>
                   <option>Arizona</option>
@@ -92,19 +88,19 @@ handleSubmit = e => {
                   <option>Wyoming</option>
           </select>
           </div>
-        </div>
 
-        <div className='form-group'>
-          <input onChange={this.handleChange} value={this.state.month} name="month" placeholder="Month" className="form-control"/>
         </div>
         <div className='form-group'>
-          <input onChange={this.handleChange} value={this.state.date} name="date" placeholder="Date" className="form-control" />
+          <input onChange={this.handleChange} value={this.state.formData.month} name="month" placeholder="Month" className="form-control"/>
         </div>
         <div className='form-group'>
-          <input onChange={this.handleChange} value={this.state.year} name="year" placeholder="Year" className="form-control"/>
+          <input onChange={this.handleChange} value={this.state.formData.date} name="date" placeholder="Date" className="form-control" />
         </div>
-        <div >
-        <button onClick={this.handleSubmit} type="submit" className="btn btn-primary">Create Event</button>
+        <div className='form-group'>
+          <input onChange={this.handleChange} value={this.state.formData.year} name="year" placeholder="Year" className="form-control"/>
+        </div>
+        <div>
+        <button onClick={this.handleSubmit} type="submit" className="btn btn-primary">Update Event</button>
         </div>
         </form>
 

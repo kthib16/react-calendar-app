@@ -3,10 +3,12 @@ import './App.css';
 import React from 'react';
 import { Switch, Route, NavLink } from 'react-router-dom';
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, setDoc } from 'firebase/firestore';
 import Home from './pages/Home';
 import CreateEvent from './pages/CreateEvent';
 import NearbyEvents from './pages/NearbyEvents';
+import EventDetails from './pages/EventDetails';
+import EditEvent from './pages/EditEvent';
 
 const firebaseConfig = {
   apiKey: "AIzaSyCBerhVvYqX_oITGaqgzbYhtT01AoprpzE",
@@ -42,7 +44,6 @@ getEvents = async () => {
         month: individualEvent.data().month,
         year: individualEvent.data().year,
         eventName: individualEvent.data().eventName,
-        guestsAttending: individualEvent.data().guestsAttending,
         isGoing: individualEvent.data().isGoing,
         locationCity: individualEvent.data().locationCity,
         locationState: individualEvent.data().locationState
@@ -57,7 +58,6 @@ getEvents = async () => {
 
 createEvent = async newEvent => {
   const eventsCollection = collection(db, 'Events');
-
   await addDoc(eventsCollection, newEvent);
   this.props.history.push('/');
   this.getEvents();
@@ -71,6 +71,16 @@ removeEvent = async eventId => {
   this.props.history.push('/');
   this.getEvents();
 }
+
+updateEvent = async updatedEvent => {
+  const eventsCollection = collection(db, 'Events');
+  const eventDoc = doc(eventsCollection, updatedEvent.id);
+  await setDoc(eventDoc, updatedEvent);
+  this.props.history.push('/');
+  this.getEvents();
+
+}
+
 
 render(){
   return (
@@ -95,6 +105,17 @@ render(){
         <Route exact path='/events-near-me'>
           <NearbyEvents />
         </Route>
+        <Route path='/event/' render={({ location }) =>
+          <EventDetails
+            location={ location }
+            createEvent={this.createEvent}
+          />
+        } />
+        <Route path='/edit-event/' render={({ location }) =>
+          <EditEvent
+            location={ location }
+            updateEvent={this.updateEvent} />
+        } />
       </Switch>
       </main>
     </div>
