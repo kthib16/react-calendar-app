@@ -14,6 +14,7 @@ componentDidMount() {
 }
 
 findZip = () => {
+  let zip = ''
   if(navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(function(position) {
         let lat = position.coords.latitude;
@@ -24,17 +25,19 @@ findZip = () => {
         fetch(apiUrl)
         .then(response => response.json())
         .then(parsedResponse => {
-          this.setState({
-            zip: parsedResponse.results[0].address_components[6].long_name
-          })
+          console.log('parsed response', parsedResponse.results[0].address_components[6].long_name)
+
+            zip = parsedResponse.results[0].address_components[6].long_name
         })
         .catch(error => console.log('error:', error))
             }
         );
     }
-    else { this.setState({
-      zip: 20009
-    }) }
+    else { zip = 20009 }
+
+    this.setState({
+      zip: zip
+    })
 
 }
 
