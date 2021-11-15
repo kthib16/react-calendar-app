@@ -4,11 +4,38 @@ import { Link } from 'react-router-dom';
 export default class NearbyEvents extends Component {
 
 state={
+  zip: '',
   events: []
 }
 
 componentDidMount() {
-  this.getEvents(20009);
+  this.findZip();
+  this.getEvents(this.state.zip)
+}
+
+findZip = () => {
+  if(navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(position) {
+        let lat = position.coords.latitude;
+        let long = position.coords.longitude;
+
+
+        const apiUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${long}&key=${process.env.REACT_APP_GOOGLE_KEY}`
+        fetch(apiUrl)
+        .then(response => response.json())
+        .then(parsedResponse => {
+          this.setState({
+            zip: parsedResponse.results[0].address_components[6].long_name
+          })
+        })
+        .catch(error => console.log('error:', error))
+            }
+        );
+    }
+    else { this.setState({
+      zip: 20009
+    }) }
+
 }
 
 getEvents = zip => {
