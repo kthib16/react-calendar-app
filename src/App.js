@@ -39,14 +39,13 @@ getEvents = async () => {
   const eventsArr = [];
   events.forEach(individualEvent => {
     const eachEvent = {
-      id: individualEvent.id,
+      id: (individualEvent.data().id ? individualEvent.data().id : individualEvent.id),
         date: individualEvent.data().date,
-        month: individualEvent.data().month,
-        year: individualEvent.data().year,
         eventName: individualEvent.data().eventName,
         isGoing: individualEvent.data().isGoing,
         locationCity: individualEvent.data().locationCity,
-        locationState: individualEvent.data().locationState
+        locationState: individualEvent.data().locationState,
+        image: individualEvent.data().image
     }
     eventsArr.push(eachEvent)
   })
@@ -109,6 +108,7 @@ render(){
           <EventDetails
             location={ location }
             createEvent={this.createEvent}
+            removeEvent={this.removeEvent}
           />
         } />
         <Route path='/edit-event/' render={({ location }) =>

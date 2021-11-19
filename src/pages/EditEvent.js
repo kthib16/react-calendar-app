@@ -91,13 +91,7 @@ render(){
 
         </div>
         <div className='form-group'>
-          <input onChange={this.handleChange} value={this.state.formData.month} name="month" placeholder="Month" className="form-control"/>
-        </div>
-        <div className='form-group'>
-          <input onChange={this.handleChange} value={this.state.formData.date} name="date" placeholder="Date" className="form-control" />
-        </div>
-        <div className='form-group'>
-          <input onChange={this.handleChange} value={this.state.formData.year} name="year" placeholder="Year" className="form-control"/>
+          <input onChange={this.handleChange} value={this.state.formData.date} name="date" placeholder="YYYY-MM-DD" className="form-control" />
         </div>
         <div>
         <button onClick={this.handleSubmit} type="submit" className="btn btn-primary">Update Event</button>

@@ -14,8 +14,6 @@ handleSubmit = e => {
   e.preventDefault();
   const newEventObj = {
     date: parseInt(this.state.date),
-    month: this.state.month,
-    year: parseInt(this.state.year),
     eventName: this.state.eventName,
     isGoing: true,
     locationCity: this.state.locationCity,
@@ -93,15 +91,8 @@ handleSubmit = e => {
           </select>
           </div>
         </div>
-
         <div className='form-group'>
-          <input onChange={this.handleChange} value={this.state.month} name="month" placeholder="Month" className="form-control"/>
-        </div>
-        <div className='form-group'>
-          <input onChange={this.handleChange} value={this.state.date} name="date" placeholder="Date" className="form-control" />
-        </div>
-        <div className='form-group'>
-          <input onChange={this.handleChange} value={this.state.year} name="year" placeholder="Year" className="form-control"/>
+          <input onChange={this.handleChange} value={this.state.date} name="date" placeholder="YYYY-MM-DD" className="form-control" />
         </div>
         <div >
         <button onClick={this.handleSubmit} type="submit" className="btn btn-primary">Create Event</button>

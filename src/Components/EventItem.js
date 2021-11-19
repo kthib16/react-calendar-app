@@ -2,7 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const EventItem = (props) => {
-  const eventList = props.events.map(eventItem => {
+  const sortedArr = props.events.sort(function(a,b){return new Date(a.date) - new Date(b.date)});
+  const eventList = sortedArr.map(eventItem => {
     return(
 
       <li key={eventItem.id} className='list-group-item'>

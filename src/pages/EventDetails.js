@@ -7,7 +7,7 @@ state={
 }
 
 componentDidMount(){
-  this.getEventById(this.props.location.state.eventItem.id)
+  this.getEventById(this.props.location.state.eventItem.ticketMasterId)
 }
   getEventById = id => {
     const apiUrl =  `https://app.ticketmaster.com/discovery/v2/events/${id}.json?apikey=${process.env.REACT_APP_TICKETMASTER_API_KEY}`
@@ -28,61 +28,82 @@ componentDidMount(){
     .catch(error=>console.log('error', error))
   }
 
-getImage = searchTerm => {
-  const apiUrl = `https://serpapi.com/search.json?q=${searchTerm}&tbm=isch&api_key=0ec56cecc96fcfa875f7bd1b07f2427c7f1f3e3efdc61cd61f88f38566644d5b`
-  fetch(apiUrl)
-  .then(response => response.json())
-  .then(parsedResponse => console.log(parsedResponse))
-  .catch(error => console.log('error:', error))
-}
-
 handleSubmit = e => {
   e.preventDefault();
   const { eventItem } = this.props.location.state;
+  const eventImage = (eventItem.image ? eventItem.image : '')
   const newEventObj = {
     date: eventItem.date,
-    month: eventItem.month,
-    year: eventItem.year,
     eventName: eventItem.eventName,
     locationCity: this.state.locationCity,
     locationState: this.state.locationState,
-    isGoing: true
+    isGoing: true,
+    ticketMasterId: eventItem.ticketMasterId,
+    image: eventImage
   }
 
   this.props.createEvent(newEventObj);
 }
 
-addButton = () => {
-  if (this.props.location.state.eventItem.isGoing = true){
-  return(
-    <button className='btn btn-danger'>
-  Remove from my calendar
-  </button>)}
-  else {
-    return(
-  <button onClick={this.handleSubmit} type='submit' className="btn btn-success">
-    Add to my calendar
-  </button>
-  )}
-}
 
 render(){
   const { eventItem } = this.props.location.state;
+  console.log('event Item', eventItem)
   let location = (eventItem.locationCity ? `${eventItem.locationCity}, ${eventItem.locationState}` : `${this.state.locationCity}, ${this.state.locationState}`)
   let button = (eventItem.isGoing
-            ? <button className='btn btn-danger'>
+            ? <button onClick={() => this.props.removeEvent(eventItem.id)} className='btn btn-danger'>
                   Remove from my calendar
               </button>
             : <button onClick={this.handleSubmit} type='submit' className="btn btn-success">
                   Add to my calendar
               </button>);
     let image = (eventItem.image
-            ? <img className='event-details-img' src={eventItem.image} alt={eventItem.name} />
-            : '')
+            ? <img className='event-details-img' src={eventItem.image} alt={eventItem.eventName} />
+            : '');
+
+    const date = eventItem.date.split('-');
+    let month =''
+        if(date[1] === '01') {
+          month = 'January'
+        }
+        else if(date[1] === '02'){
+          month='February'
+        }
+        else if(date[1] === '03'){
+          month='March'
+        }
+        else if(date[1] === '04'){
+          month='April'
+        }
+        else if(date[1] === '05'){
+          month='May'
+        }
+        else if(date[1] === '06'){
+          month='June'
+        }
+        else if(date[1] === '07'){
+          month='July'
+        }
+        else if(date[1] === '08'){
+          month='August'
+        }
+        else if(date[1] === '09'){
+          month='September'
+        }
+        else if(date[1] === '10'){
+          month='October'
+        }
+        else if(date[1] === '11'){
+          month='November'
+        }
+        else if(date[1] === '12'){
+          month='December'
+        }
+
 
   return(
     <div>
-    <p>{eventItem.month} {eventItem.date}, {eventItem.year}</p>
+    <p>{month} {date[2]}, {date[0]}</p>
     {image}
     <h4>
       <a href={this.state.url}>
