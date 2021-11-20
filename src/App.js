@@ -31,6 +31,23 @@ state = {
 
 componentDidMount() {
   this.getEvents();
+  const success = position => {
+  this.setState({lat: position.coords.latitude, long: position.coords.longitude}, () => {
+  })
+  }
+
+  const error = () => {
+    console.log("Unable to retrieve your location");
+  };
+
+  navigator.geolocation.getCurrentPosition(success, error);
+}
+
+componentDidUpdate(nextState){
+  if(nextState.lat !== this.state.lat){
+    this.findZip(this.state.lat, this.state.long)
+  }
+
 }
 
 getEvents = async () => {
@@ -80,9 +97,23 @@ updateEvent = async updatedEvent => {
 
 }
 
+findZip = (lat, long) => {
+
+    const apiUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${long}&key=${process.env.REACT_APP_GOOGLE_KEY}`
+    fetch(apiUrl)
+    .then(response => response.json())
+    .then(parsedResponse => {
+      this.setState({
+        zip: parsedResponse.results[0].address_components[6].long_name})
+    })
+    .catch(error => console.log('error:', error))
+
+}
+
 
 render(){
   return (
+
     <div className="App">
     <header className="App-header">
       <div className="nav-home">
@@ -102,7 +133,7 @@ render(){
           <CreateEvent createEvent={this.createEvent} />
         </Route>
         <Route exact path='/events-near-me'>
-          <NearbyEvents />
+          <NearbyEvents zip={this.state.zip}/>
         </Route>
         <Route path='/event/' render={({ location }) =>
           <EventDetails

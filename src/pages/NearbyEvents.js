@@ -4,45 +4,23 @@ import { Link } from 'react-router-dom';
 export default class NearbyEvents extends Component {
 
 state={
-  zip: '',
   events: []
 }
 
-componentDidMount() {
-  this.findZip();
-  this.getEvents(this.state.zip)
+componentDidMount(){
+    console.log(this.props.zip)
 }
 
-findZip = () => {
-  let zip = ''
-  if(navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(function(position) {
-        let lat = position.coords.latitude;
-        let long = position.coords.longitude;
+componentDidUpdate(previousProps){
 
-
-        const apiUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${long}&key=${process.env.REACT_APP_GOOGLE_KEY}`
-        fetch(apiUrl)
-        .then(response => response.json())
-        .then(parsedResponse => {
-          console.log('parsed response', parsedResponse.results[0].address_components[6].long_name)
-
-            zip = parsedResponse.results[0].address_components[6].long_name
-        })
-        .catch(error => console.log('error:', error))
-            }
-        );
-    }
-    else { zip = 20009 }
-
-    this.setState({
-      zip: zip
-    })
-
+if(this.props.zip !== previousProps.zip){
+  this.getEvents(this.props.zip)
+}
 }
 
 getEvents = zip => {
-  const apiUrl = `https://app.ticketmaster.com/discovery/v2/events.json?postalCode=${zip}&apikey=${process.env.REACT_APP_TICKETMASTER_API_KEY}`
+
+  const apiUrl = `https://app.ticketmaster.com/discovery/v2/events.json?&postalCode=${zip}&apikey=${process.env.REACT_APP_TICKETMASTER_API_KEY}`
   fetch(apiUrl)
   .then(response => {
     return response.json();
@@ -64,6 +42,7 @@ getEvents = zip => {
     })
   })})
   .catch(error=>console.log('error', error))
+
 }
 
 
@@ -73,65 +52,67 @@ getEvents = zip => {
 
     return(
       <div>
+
       <h4>Nearby Events</h4>
       <div className='container'>
-          {this.state.events.map(eventItem => {
-            let date = eventItem.date.split('-')
-            let month =''
-            if(date[1] === '01') {
-              month = 'January'
-            }
-            else if(date[1] === '02'){
-              month='February'
-            }
-            else if(date[1] === '03'){
-              month='March'
-            }
-            else if(date[1] === '04'){
-              month='April'
-            }
-            else if(date[1] === '05'){
-              month='May'
-            }
-            else if(date[1] === '06'){
-              month='June'
-            }
-            else if(date[1] === '07'){
-              month='July'
-            }
-            else if(date[1] === '08'){
-              month='August'
-            }
-            else if(date[1] === '09'){
-              month='September'
-            }
-            else if(date[1] === '10'){
-              month='October'
-            }
-            else if(date[1] === '11'){
-              month='November'
-            }
-            else if(date[1] === '12'){
-              month='December'
-            }
+      {this.state.events.map(eventItem => {
+        let date = eventItem.date.split('-')
+        let month =''
+        if(date[1] === '01') {
+          month = 'January'
+        }
+        else if(date[1] === '02'){
+          month='February'
+        }
+        else if(date[1] === '03'){
+          month='March'
+        }
+        else if(date[1] === '04'){
+          month='April'
+        }
+        else if(date[1] === '05'){
+          month='May'
+        }
+        else if(date[1] === '06'){
+          month='June'
+        }
+        else if(date[1] === '07'){
+          month='July'
+        }
+        else if(date[1] === '08'){
+          month='August'
+        }
+        else if(date[1] === '09'){
+          month='September'
+        }
+        else if(date[1] === '10'){
+          month='October'
+        }
+        else if(date[1] === '11'){
+          month='November'
+        }
+        else if(date[1] === '12'){
+          month='December'
+        }
 
 
-              return(
-                    <div key={eventItem.id}  className="card">
-                    <Link to={{pathname: `/event/${eventItem.id}`, state: { eventItem: eventItem } } } >
+          return(
+                <div key={eventItem.id}  className="card">
+                <Link to={{pathname: `/event/${eventItem.id}`, state: { eventItem: eventItem } } } >
 
-                      <img className="card-img-top" src={eventItem.image} alt={eventItem.eventName} />
-                      <div className="card-body">
-                        <h5 className="card-title">{eventItem.eventName}</h5>
-                        <p className="card-text">{month} {date[2]}, {date[0]}</p>
-                      </div>
-                  </Link>
+                  <img className="card-img-top" src={eventItem.image} alt={eventItem.eventName} />
+                  <div className="card-body">
+                    <h5 className="card-title">{eventItem.eventName}</h5>
+                    <p className="card-text">{month} {date[2]}, {date[0]}</p>
                   </div>
-                    )
-                  })}
-                  </div>
+              </Link>
+              </div>
+                )
+              })}
+      </div>
       </div>
 
-    )
-  }
+
+)}
+
 }
