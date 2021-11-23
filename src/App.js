@@ -43,7 +43,6 @@ getEvents = async () => {
   const events = await getDocs(eventsCollection);
   const eventsArr = [];
   events.forEach(individualEvent => {
-    console.log('individualEvent', individualEvent.data())
     const eachEvent = {
       id: (individualEvent.data().id ? individualEvent.data().id : individualEvent.id),
         date: individualEvent.data().date,

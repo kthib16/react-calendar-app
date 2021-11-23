@@ -8,7 +8,9 @@ i{
 
 }
 
-
+.img-home{
+  max-height: 30vh;
+}
 
 .App-logo {
   height: 40vmin;
