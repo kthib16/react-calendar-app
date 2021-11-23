@@ -15,6 +15,7 @@ handleSubmit = e => {
   const newEventObj = {
     date: this.state.date,
     eventName: this.state.eventName,
+    image: this.state.image,
     isGoing: true,
     locationCity: this.state.locationCity,
     locationState: this.state.locationState,
