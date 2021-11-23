@@ -97,6 +97,9 @@ handleSubmit = e => {
         <div className='form-group'>
           <input onChange={this.handleChange} value={this.state.date} name="date" placeholder="YYYY-MM-DD" className="form-control" />
         </div>
+        <div className='form-group'>
+          <input onChange={this.handleChange} value={this.state.image} name='image' placeholder='image url' className="form-control" />
+        </div>
         <div >
         <button onClick={this.handleSubmit} type="submit" className="btn btn-primary">Create Event</button>
         </div>
