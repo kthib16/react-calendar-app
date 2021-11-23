@@ -62,12 +62,15 @@ nav > a {
 
 .nav-home{
   float: left;
-  display: inline;
+  display: inline-block;
   margin-left: 15px;
+  min-height: 5vh;
+  padding: 1vmin;
 }
 
 .nav-home > a{
   color: white;
+  vertical-align: bottom;
 }
 
 main{

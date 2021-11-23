@@ -1,5 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import ReactTooltip from "react-tooltip";
+
 
 export default class EventDetails extends React.Component {
 state={
@@ -142,13 +144,15 @@ render(){
     {this.state.isGoing
       ?ticketMasterButton
       :button}
-  
+
+
     {eventItem.friendsGoing || this.state.isGoing
       ?<div className='friends-container'>
       <h5>Friends going</h5>
-      <img className='profile-img' src={this.state.friendsGoing ?this.state.friendsGoing[0].profileImage :eventItem.friendsGoing[0].profileImage} onMouseEnter={() => <div>{eventItem.friendsGoing[0].userName}</div>}/>
+        <img className='profile-img' src={this.state.friendsGoing ?this.state.friendsGoing[0].profileImage :eventItem.friendsGoing[0].profileImage} />
       </div>
       :''}
+
     </div>
   )
 }
