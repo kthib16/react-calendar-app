@@ -8,6 +8,8 @@ i{
 
 }
 
+
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;
@@ -46,6 +48,13 @@ nav > a {
     transform: rotate(360deg);
   }
 }
+.form-container{
+  max-width: 50rem;
+  margin: auto;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
 .container{
   margin-top: 10px;
   margin-bottom: 20px;
@@ -62,7 +71,7 @@ nav > a {
 }
 
 main{
-  margin: 15px 15px 0px 15px;
+  margin: 15px 50px 0px 50px;
 }
 
 
@@ -83,4 +92,12 @@ main{
 .event-details-img{
   margin: 0px 15px 0px 15px;
   max-width: 500px;
+}
+
+.friends-container{
+  margin-top: 30px;
+}
+.profile-img{
+  height: 2rem;
+  border-radius: 50px 50px;
 }

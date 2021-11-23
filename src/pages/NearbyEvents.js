@@ -1,22 +1,20 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 
+
 export default class NearbyEvents extends Component {
 
+
 state={
-  events: []
+  events: [],
 }
+
+
 
 componentDidMount(){
-    console.log(this.props.zip)
+  this.getEvents(20009)
 }
 
-componentDidUpdate(previousProps){
-
-if(this.props.zip !== previousProps.zip){
-  this.getEvents(this.props.zip)
-}
-}
 
 getEvents = zip => {
 
@@ -26,6 +24,7 @@ getEvents = zip => {
     return response.json();
   })
   .then(parsedResponse => {
+    console.log(parsedResponse)
     const sortedArr = parsedResponse._embedded.events.sort(function(a,b){return new Date(a.dates.start.dateTime) - new Date(b.dates.start.dateTime)});
     sortedArr.forEach(eventItem => {
       const newEventObj={
@@ -98,7 +97,7 @@ getEvents = zip => {
 
           return(
                 <div key={eventItem.id}  className="card">
-                <Link to={{pathname: `/event/${eventItem.id}`, state: { eventItem: eventItem } } } >
+                <Link to={{pathname: `/event/${eventItem.ticketMasterId}`, state: { eventItem: eventItem } } } >
 
                   <img className="card-img-top" src={eventItem.image} alt={eventItem.eventName} />
                   <div className="card-body">

@@ -1,14 +1,18 @@
 import logo from './logo.svg';
 import './App.css';
 import React from 'react';
-import { Switch, Route, NavLink } from 'react-router-dom';
+import { Switch, Route, NavLink, Redirect } from 'react-router-dom';
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, setDoc } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, setDoc, auth } from 'firebase/firestore';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, currentUser } from 'firebase/auth'
 import Home from './pages/Home';
+import MyCalendar from './pages/MyCalendar';
 import CreateEvent from './pages/CreateEvent';
 import NearbyEvents from './pages/NearbyEvents';
 import EventDetails from './pages/EventDetails';
 import EditEvent from './pages/EditEvent';
+import Login from './pages/Login';
+import Register from './pages/Register';
 
 const firebaseConfig = {
   apiKey: "AIzaSyCBerhVvYqX_oITGaqgzbYhtT01AoprpzE",
@@ -30,25 +34,10 @@ state = {
 }
 
 componentDidMount() {
-  this.getEvents();
-  const success = position => {
-  this.setState({lat: position.coords.latitude, long: position.coords.longitude}, () => {
-  })
-  }
-
-  const error = () => {
-    console.log("Unable to retrieve your location");
-  };
-
-  navigator.geolocation.getCurrentPosition(success, error);
+  this.getEvents()
 }
 
-componentDidUpdate(nextState){
-  if(nextState.lat !== this.state.lat){
-    this.findZip(this.state.lat, this.state.long)
-  }
 
-}
 
 getEvents = async () => {
   const eventsCollection = collection(db, 'Events');
@@ -62,7 +51,9 @@ getEvents = async () => {
         isGoing: individualEvent.data().isGoing,
         locationCity: individualEvent.data().locationCity,
         locationState: individualEvent.data().locationState,
-        image: individualEvent.data().image
+        image: individualEvent.data().image,
+        ticketMasterId: individualEvent.data().ticketMasterId,
+        friendsGoing: individualEvent.data().friendsGoing
     }
     eventsArr.push(eachEvent)
   })
@@ -97,55 +88,136 @@ updateEvent = async updatedEvent => {
 
 }
 
-findZip = (lat, long) => {
+login = async existingUser => {
+    try{
+      const auth = getAuth();
+      const data = await signInWithEmailAndPassword(
+        auth,
+        existingUser.email,
+        existingUser.password
+      );
 
-    const apiUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${long}&key=${process.env.REACT_APP_GOOGLE_KEY}`
-    fetch(apiUrl)
-    .then(response => response.json())
-    .then(parsedResponse => {
       this.setState({
-        zip: parsedResponse.results[0].address_components[6].long_name})
-    })
-    .catch(error => console.log('error:', error))
+        user: data.user
+      }, () => this.props.history.push('/'))
+    } catch(error){
 
+      console.log('error:', error)
+    }
+  }
+
+
+logout = () => {
+  try {
+    const auth = getAuth();
+    signOut(auth)
+    .then(() => {
+      this.setState({
+        user: null
+      }, () => this.props.history.push('/login'))
+    })
+  }
+  catch(error){
+    console.log('error:', error)
+  }
 }
 
+register = async newUser => {
+    try{
+      const auth = getAuth();
+      const data = await createUserWithEmailAndPassword(
+        auth,
+        newUser.email,
+        newUser.password
+      );
+
+      this.setState({
+        user: data.user
+      }, () => this.props.history.push('/puppies'))
+    } catch(error){
+
+      console.log('error:', error)
+    }
+  }
 
 render(){
   return (
 
     <div className="App">
     <header className="App-header">
-      <div className="nav-home">
-        <NavLink exact to='/'>MY CALENDAR</NavLink>
-      </div>
-      <nav>
-        <NavLink exact to='/add-event'>CREATE EVENT</NavLink>
-        <NavLink exact to='/events-near-me'>EVENTS NEAR ME</NavLink>
-      </nav>
+    {this.state.user
+      ?(<>
+        <div className="nav-home">
+        <NavLink exact to='/my-calendar'>MY CALENDAR</NavLink>
+        </div>
+
+        <nav>
+          <NavLink exact to='/logout'>LOGOUT</NavLink>
+          <NavLink exact to='/add-event'>CREATE EVENT</NavLink>
+          <NavLink exact to='/events-near-me'>EVENTS NEAR ME</NavLink>
+
+        </nav>
+        </>
+        )
+        :(
+          <nav>
+            <NavLink exact to='/login'>SIGNUP/LOGIN</NavLink>
+          </nav>
+          )
+        }
     </header>
       <main>
       <Switch>
-        <Route exact path='/'>
-          <Home events={this.state.events} removeEvent={this.removeEvent}/>
+      <Route exact path='/'>
+        <Home />
+      </Route>
+        <Route exact path='/my-calendar'>
+          {this.state.user
+          ?<MyCalendar events={this.state.events} removeEvent={this.removeEvent}/>
+          : <Redirect to={{pathname: '/login'}} />
+        }
+        </Route>
+        <Route exact path='/login'>
+          <Login login={this.login} />
+        </Route>
+        <Route exact path='/register'>
+          <Register register={this.register}/>
+        </Route>
+        <Route exact path='/logout' render={()=> this.logout()}>
         </Route>
         <Route exact path='/add-event'>
-          <CreateEvent createEvent={this.createEvent} />
+          {this.state.user
+            ?<CreateEvent
+              createEvent={this.createEvent}
+              user={this.state.user.email} />
+            :<Redirect to={{pathname: '/login'}} />
+          }
         </Route>
         <Route exact path='/events-near-me'>
-          <NearbyEvents zip={this.state.zip}/>
+        {this.state.user
+          ?<NearbyEvents
+              zip={this.state.zip}/>
+          :<Redirect to={{pathname: '/login'}} />
+        }
         </Route>
         <Route path='/event/' render={({ location }) =>
-          <EventDetails
+
+        this.state.user
+          ? <EventDetails
             location={ location }
             createEvent={this.createEvent}
             removeEvent={this.removeEvent}
+            user={this.state.user.email}
+            events={this.state.events}
           />
+          :this.props.history.push('/login')
         } />
         <Route path='/edit-event/' render={({ location }) =>
-          <EditEvent
+          this.state.user
+          ?<EditEvent
             location={ location }
             updateEvent={this.updateEvent} />
+          :this.props.history.push('/login')
         } />
       </Switch>
       </main>

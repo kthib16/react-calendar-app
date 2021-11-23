@@ -26,6 +26,7 @@ render(){
 
     return(
       <main>
+      <div className='form-container'>
       <form >
         <div className='form-group' >
           <input onChange={this.handleChange} value={this.state.formData.eventName} name="eventName" placeholder="Enter Event Name" className="form-control form-control-lg"/>
@@ -97,7 +98,7 @@ render(){
         <button onClick={this.handleSubmit} type="submit" className="btn btn-primary">Update Event</button>
         </div>
         </form>
-
+        </div>
         </main>
 
     )

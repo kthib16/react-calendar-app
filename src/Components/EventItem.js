@@ -7,7 +7,7 @@ const EventItem = (props) => {
     return(
 
       <li key={eventItem.id} className='list-group-item'>
-      <Link to={{pathname: `/event/${eventItem.id}`, state: { eventItem: eventItem } } } >
+      <Link to={{pathname: `/event/${eventItem.ticketMasterId ?eventItem.ticketMasterId :eventItem.id}`, state: { eventItem: eventItem } } } >
         <div className='list-inline-item'>
           {eventItem.eventName}
         </div>
