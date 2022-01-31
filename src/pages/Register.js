@@ -4,10 +4,8 @@ export default class Register extends React.Component{
   state={
     email: '',
     password: '',
-    firstName: '',
-    lastName: '',
-    zip: ''
-
+    displayName: '',
+    photoURL: ''
   }
 
   handleChange = e => {
@@ -29,9 +27,9 @@ export default class Register extends React.Component{
                   <input
                     type="text"
                     className="form-control my-3"
-                    placeholder="First Name"
-                    name="firstName"
-                    value={this.state.firstName}
+                    placeholder="Display Name"
+                    name="displayName"
+                    value={this.state.displayName}
                     onChange={this.handleChange}
                     />
               </div>
@@ -39,19 +37,9 @@ export default class Register extends React.Component{
                   <input
                     type="text"
                     className="form-control my-3"
-                    placeholder="Last Name"
-                    name="lastName"
-                    value={this.state.lastName}
-                    onChange={this.handleChange}
-                    />
-              </div>
-              <div>
-                  <input
-                    type="text"
-                    className="form-control my-3"
-                    placeholder="ZIP code"
-                    name="zip"
-                    value={this.state.zip}
+                    placeholder="Photo URL"
+                    name="photoURL"
+                    value={this.state.photoURL}
                     onChange={this.handleChange}
                     />
               </div>

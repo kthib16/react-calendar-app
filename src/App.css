@@ -25,7 +25,7 @@ i{
 
 .App-header {
   background-color: #282c34;
-  min-height: 5vh;
+  min-height: 7vh;
   display: block;
   flex-direction: column;
   font-size: 2vmin;
@@ -36,10 +36,16 @@ i{
   color: #61dafb;
 }
 
-nav > a {
-  padding: 1vmin;
+.nav-home > a {
+  padding-right: 0.5rem;
+  margin-top: 3vmin;
+}
+
+
+
+.nav-user > a {
   color: white;
-  float: right;
+  padding-right: 0.5rem;
 }
 
 @keyframes App-logo-spin {
@@ -67,12 +73,24 @@ nav > a {
   display: inline-block;
   margin-left: 15px;
   min-height: 5vh;
-  padding: 1vmin;
+  margin-top: 1vmin;
+  vertical-align: bottom;
 }
 
 .nav-home > a{
   color: white;
   vertical-align: bottom;
+}
+
+.nav-user{
+  float: right;
+  margin-top: 1vmin;
+}
+
+.nav-img{
+  max-height: 5vh;
+  border-radius: 50px 50px;
+  position: inline-block;
 }
 
 main{
@@ -105,6 +123,11 @@ main{
 .profile-img{
   height: 2rem;
   border-radius: 50px 50px;
+}
+
+.large-img{
+  height: 5rem;
+  padding-bottom: 10rem;
 }
 
 .home{

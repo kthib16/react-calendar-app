@@ -4,15 +4,15 @@ import React from 'react';
 import { Switch, Route, NavLink, Redirect } from 'react-router-dom';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, setDoc, auth } from 'firebase/firestore';
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, currentUser } from 'firebase/auth'
+import { getAuth, signOut, signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
 import Home from './pages/Home';
 import MyCalendar from './pages/MyCalendar';
 import CreateEvent from './pages/CreateEvent';
 import NearbyEvents from './pages/NearbyEvents';
 import EventDetails from './pages/EventDetails';
 import EditEvent from './pages/EditEvent';
-import Login from './pages/Login';
 import Register from './pages/Register';
+import UserProfile from './pages/UserProfile';
 
 const firebaseConfig = {
   apiKey: "AIzaSyCBerhVvYqX_oITGaqgzbYhtT01AoprpzE",
@@ -34,8 +34,10 @@ state = {
 }
 
 componentDidMount() {
-  this.getEvents()
+this.getEvents()
 }
+
+
 
 
 getEvents = async () => {
@@ -87,57 +89,59 @@ updateEvent = async updatedEvent => {
 
 }
 
-login = async existingUser => {
-    try{
+login = () => {
       const auth = getAuth();
-      const data = await signInWithEmailAndPassword(
-        auth,
-        existingUser.email,
-        existingUser.password
-      );
+      const provider = new GoogleAuthProvider();
 
-      this.setState({
-        user: data.user
-      }, () => this.props.history.push('/'))
-    } catch(error){
+      signInWithPopup(auth, provider)
+      .then(result => {
+        this.setState({
+          user:result.user
+        }, () => {this.props.history.push('/my-calendar')})
+      })
 
-      console.log('error:', error)
-    }
+      .catch(error => console.log('error:', error))
   }
 
 
 logout = () => {
-  try {
-    const auth = getAuth();
-    signOut(auth)
-    .then(() => {
-      this.setState({
-        user: null
-      }, () => this.props.history.push('/login'))
-    })
-  }
-  catch(error){
-    console.log('error:', error)
-  }
+  const auth = getAuth();
+  signOut(auth)
+  .then(() => {
+    this.setState({
+      user: null
+    }, () => {this.props.history.push('/')})
+  })
 }
 
-register = async newUser => {
-    try{
-      const auth = getAuth();
-      const data = await createUserWithEmailAndPassword(
-        auth,
-        newUser.email,
-        newUser.password
-      );
-
-      this.setState({
-        user: data.user
-      }, () => this.props.history.push('/puppies'))
-    } catch(error){
-
-      console.log('error:', error)
-    }
-  }
+// register = async newUser => {
+//     try{
+//       const auth = getAuth();
+//       const data = await createUserWithEmailAndPassword(
+//         auth,
+//         newUser.email,
+//         newUser.password
+//       );
+//       const user = auth.currentUser;
+//       // user.updateProfile({
+//       //   displayName: newUser.displayName ?newUser.displayName :null,
+//       //   photoURL: newUser.photoURL ?newUser.photoURL :null })
+//       //     .then(function() {
+//       //       var displayName = user.displayName;
+//       //       var photoURL = user.photoURL;
+//       //     }, function(error) {
+//       //       console.log('error:', error)
+//       //   });
+//       console.log('user', user)
+//
+//       this.setState({
+//         user: data.user
+//       }, () => this.props.history.push('/'))
+//     } catch(error){
+//
+//       console.log('error:', error)
+//     }
+//   }
 
 render(){
   return (
@@ -148,23 +152,25 @@ render(){
       ?(<>
         <div className="nav-home">
         <NavLink exact to='/my-calendar'>MY CALENDAR</NavLink>
+        <NavLink exact to='/add-event'>CREATE EVENT</NavLink>
+        <NavLink exact to='/events-near-me'>EVENTS NEAR ME</NavLink>
         </div>
 
-        <nav>
-          <NavLink exact to='/logout'>LOGOUT</NavLink>
-          <NavLink exact to='/add-event'>CREATE EVENT</NavLink>
-          <NavLink exact to='/events-near-me'>EVENTS NEAR ME</NavLink>
-
-        </nav>
+        <div className='nav-user'>
+        <NavLink exact to='/logout'>LOGOUT</NavLink>
+        </div>
+        <div className='nav-user'>
+            <NavLink exact to='user-profile'><img className='nav-img' src={this.state.user.photoURL} /></NavLink>
+        </div>
         </>
         )
         :(<>
           <div className="nav-home">
           MY CALENDAR
           </div>
-          <nav>
+          <div className='nav-user' onClick={this.login}>
             <NavLink exact to='/login'>SIGNUP/LOGIN</NavLink>
-          </nav></>
+          </div></>
           )
         }
     </header>
@@ -175,13 +181,14 @@ render(){
       </Route>
         <Route exact path='/my-calendar'>
           {this.state.user
-          ?<MyCalendar events={this.state.events} removeEvent={this.removeEvent}/>
+          ?<MyCalendar events={this.state.events} removeEvent={this.removeEvent} user={this.state.user}/>
           : <Redirect to={{pathname: '/login'}} />
         }
         </Route>
-        <Route exact path='/login'>
-          <Login login={this.login} />
+        <Route exact path='/logout' render={() => this.logout()}>
+
         </Route>
+
         <Route exact path='/register'>
           <Register register={this.register}/>
         </Route>
@@ -199,6 +206,12 @@ render(){
         {this.state.user
           ?<NearbyEvents
               zip={this.state.zip}/>
+          :<Redirect to={{pathname: '/login'}} />
+        }
+        </Route>
+        <Route exact path='/user-profile'>
+        {this.state.user
+          ?<UserProfile user={this.state.user}/>
           :<Redirect to={{pathname: '/login'}} />
         }
         </Route>
@@ -221,6 +234,9 @@ render(){
             updateEvent={this.updateEvent} />
           :this.props.history.push('/login')
         } />
+        <Route path='*'>
+          <div className="panel panel-default homepage">404</div>
+        </Route>
       </Switch>
       </main>
     </div>

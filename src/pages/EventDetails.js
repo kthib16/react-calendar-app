@@ -9,6 +9,7 @@ state={
 }
 
 componentDidMount(){
+  //checks if a ticketmaster ID was passed down from props. If so, pulls the event data from the ticketmaster API and sets state
   if(this.props.location.state.eventItem.ticketMasterId){
     this.getEventById(this.props.location.state.eventItem.ticketMasterId)
   }
@@ -22,13 +23,24 @@ componentDidMount(){
     .then(parsedResponse => {
       let logic = false;
       let friendsGoing = []
+      let userIsGoing = false;
       this.props.events.forEach(eachItem => {
+        //Checks firebase database of events for Ticketmaster event and pulls the list of friends going.
+        //Sets logic to true so it can later be used to determine whether the current user is attending.
         if(eachItem.ticketMasterId === id){
-          logic = true;
-          friendsGoing = eachItem.friendsGoing
+          for(var i = 0; i < eachItem.friendsGoing.length; i++){
+            //only sets logic to true if the current user is in the list of friends going
+            if(eachItem.friendsGoing[i].userName === this.props.user){
+            logic = true
+            friendsGoing = eachItem.friendsGoing
+            }
+            else{
+            friendsGoing = eachItem.friendsGoing
+            }
           return logic, friendsGoing
         }
-      })
+      }})
+
 
       this.setState({
         event: parsedResponse,
@@ -67,14 +79,16 @@ removeTicketMasterEvent = () => {
   })
 }
 
-
 render(){
+
+
   const { eventItem } = this.props.location.state;
   let location = (eventItem.locationCity ? `${eventItem.locationCity}, ${eventItem.locationState}` : `${this.state.locationCity}, ${this.state.locationState}`)
   let button = (eventItem.isGoing
             ? <button onClick={() => this.props.removeEvent(eventItem.id)} className='btn btn-danger'>
                   Remove from my calendar
               </button>
+
             : <button onClick={this.handleSubmit} type='submit' className="btn btn-success">
                   Add to my calendar
               </button>);
@@ -85,6 +99,12 @@ render(){
               : <button onClick={this.handleSubmit} type='submit' className="btn btn-success">
                     Add to my calendar
                 </button>);
+    let editButton = (eventItem.ticketMasterId === null
+                      ?   <Link to={{pathname: `/edit-event/${eventItem.id}`, state: { eventItem: eventItem }}} >
+                            <button className='btn btn-success'>Edit Event</button>
+                        </Link>
+                      :''
+                    )
     let image = (eventItem.image
             ? <img className='event-details-img' src={eventItem.image} alt={eventItem.eventName} />
             : '');
@@ -141,9 +161,11 @@ render(){
     <p>
     {location}
     </p>
-    {this.state.isGoing
-      ?ticketMasterButton
-      :button}
+    {this.props.location.state.eventItem.isGoing
+      ?button
+      :ticketMasterButton}
+
+      <div>{editButton}</div>
 
 
     {eventItem.friendsGoing || this.state.isGoing
