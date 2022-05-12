@@ -30,7 +30,8 @@ type State = {
 
 export default class App extends React.Component<{}, State> {
 state: State = {
-  events: []
+  events: [],
+  user: undefined
 }
 
 componentDidMount() {
@@ -117,7 +118,7 @@ logout = () => {
   signOut(auth)
   .then(() => {
     this.setState({
-      user: null
+      user: undefined
     }, () => {this.props.history.push('/')})
   })
 }
@@ -191,10 +192,13 @@ SEARCH EVENTS</NavLink>
       <main>
       <Switch>
       <Route exact path='/'>
-        <Home
+      {this.state.user
+        ?<Home
           state={this.state}
           upcomingEvents={this.state.upcomingEvents}
           />
+          :<Home />
+        }
       </Route>
         <Route exact path='/my-calendar'>
           {this.state.user
