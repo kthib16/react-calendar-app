@@ -8,19 +8,21 @@ const EventItem = (props) => {
       if(eventItem.friendsGoing[i].userName === props.user.email){
         return(
 
-          <li key={eventItem.id} className='list-group-item'>
+          <li key={eventItem.id} className='list-group-item d-flex justify-content-between text-left align-middle'>
           <Link to={{pathname: `/event/${eventItem.ticketMasterId ?eventItem.ticketMasterId :eventItem.id}`, state: { eventItem: eventItem } } } >
-            <div className='list-inline-item'>
+            <div>
               {eventItem.eventName}
             </div>
             </Link>
-            <div className='list-inline-item float-right'>
+            <div>
               <button className='btn' onClick={() => props.removeEvent(eventItem.id)}>
                 <i className='fas fa-trash'></i>
                 </button>
             </div>
           </li>
         )
+      } else {
+        return ''
       }
     }
 

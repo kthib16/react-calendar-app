@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default class EditEvent extends React.Component{
+export class EditEvent extends React.Component{
 
 state={
   formData: this.props.location.state.eventItem

@@ -1,9 +1,8 @@
-import React from 'react';
+import * as React from 'react';
 import { Link } from 'react-router-dom';
-import ReactTooltip from "react-tooltip";
 
 
-export default class EventDetails extends React.Component {
+export class EventDetails extends React.Component {
 state={
 
 }
@@ -21,9 +20,8 @@ componentDidMount(){
       return response.json();
     })
     .then(parsedResponse => {
-      let logic = false;
+      let isGoing = false;
       let friendsGoing = []
-      let userIsGoing = false;
       this.props.events.forEach(eachItem => {
         //Checks firebase database of events for Ticketmaster event and pulls the list of friends going.
         //Sets logic to true so it can later be used to determine whether the current user is attending.
@@ -31,13 +29,13 @@ componentDidMount(){
           for(var i = 0; i < eachItem.friendsGoing.length; i++){
             //only sets logic to true if the current user is in the list of friends going
             if(eachItem.friendsGoing[i].userName === this.props.user){
-            logic = true
+            isGoing = true
             friendsGoing = eachItem.friendsGoing
             }
             else{
             friendsGoing = eachItem.friendsGoing
             }
-          return logic, friendsGoing
+          return [isGoing, friendsGoing];
         }
       }})
 
@@ -47,7 +45,7 @@ componentDidMount(){
         url: parsedResponse.url,
         locationCity: parsedResponse._embedded.venues[0].city.name,
         locationState: parsedResponse._embedded.venues[0].state.name,
-        isGoing: logic,
+        isGoing: isGoing,
         friendsGoing: friendsGoing
       })
     })
@@ -58,8 +56,18 @@ handleSubmit = e => {
   e.preventDefault();
   const { eventItem } = this.props.location.state;
   const eventImage = (eventItem.image ? eventItem.image : '')
+  let date = eventItem.date.split('-')
+  let month = date[1].split('')
+  if(month[0] === '0'){
+    month = month[1]
+  } else{
+    month = month.join('')
+  }
+
+  date = date[0] + '-' + month + '-' + date[2]
+
   const newEventObj = {
-    date: eventItem.date,
+    date: date,
     eventName: eventItem.eventName,
     locationCity: this.state.locationCity,
     locationState: this.state.locationState,
@@ -85,19 +93,19 @@ render(){
   const { eventItem } = this.props.location.state;
   let location = (eventItem.locationCity ? `${eventItem.locationCity}, ${eventItem.locationState}` : `${this.state.locationCity}, ${this.state.locationState}`)
   let button = (eventItem.isGoing
-            ? <button onClick={() => this.props.removeEvent(eventItem.id)} className='btn btn-danger'>
-                  Remove from my calendar
+            ? <button onClick={() => this.props.removeEvent(eventItem.id)} className='btn btn-danger mb-1'>
+                  Remove event
               </button>
 
-            : <button onClick={this.handleSubmit} type='submit' className="btn btn-success">
-                  Add to my calendar
+            : <button onClick={this.handleSubmit} type='submit' className="btn btn-success mb-1">
+                  Add event
               </button>);
     let ticketMasterButton = (this.state.isGoing
-              ? <button onClick={this.removeTicketMasterEvent} className='btn btn-danger'>
-                    Remove from my calendar
+              ? <button onClick={this.removeTicketMasterEvent} className='btn btn-danger mb-1'>
+                    Remove event
                 </button>
-              : <button onClick={this.handleSubmit} type='submit' className="btn btn-success">
-                    Add to my calendar
+              : <button onClick={this.handleSubmit} type='submit' className="btn btn-success mb-1">
+                    Add event
                 </button>);
     let editButton = (eventItem.ticketMasterId === null
                       ?   <Link to={{pathname: `/edit-event/${eventItem.id}`, state: { eventItem: eventItem }}} >
@@ -109,49 +117,58 @@ render(){
             ? <img className='event-details-img' src={eventItem.image} alt={eventItem.eventName} />
             : '');
 
+
+
+
     const date = eventItem.date.split('-');
-    let month =''
-        if(date[1] === '01') {
+    let month = date[1].split('')
+    if(month[0] === '0'){
+      month = month[1]
+    } else{
+      month = month.join('')
+    }
+
+        if(month === '1') {
           month = 'January'
         }
-        else if(date[1] === '02'){
+        else if(month === '2'){
           month='February'
         }
-        else if(date[1] === '03'){
+        else if(month === '3'){
           month='March'
         }
-        else if(date[1] === '04'){
+        else if(month === '4'){
           month='April'
         }
-        else if(date[1] === '05'){
+        else if(month === '5'){
           month='May'
         }
-        else if(date[1] === '06'){
+        else if(month === '6'){
           month='June'
         }
-        else if(date[1] === '07'){
+        else if(month === '7'){
           month='July'
         }
-        else if(date[1] === '08'){
+        else if(month === '8'){
           month='August'
         }
-        else if(date[1] === '09'){
+        else if(month === '9'){
           month='September'
         }
-        else if(date[1] === '10'){
+        else if(month === '10'){
           month='October'
         }
-        else if(date[1] === '11'){
+        else if(month === '11'){
           month='November'
         }
-        else if(date[1] === '12'){
+        else if(month === '12'){
           month='December'
         }
 
 
   return(
     <div>
-    <p>{month} {date[2]}, {date[0]}</p>
+    <p><strong>{month} {date[2]}, {date[0]}</strong></p>
     {image}
     <h4>
       <a href={this.state.url}>
@@ -166,14 +183,6 @@ render(){
       :ticketMasterButton}
 
       <div>{editButton}</div>
-
-
-    {eventItem.friendsGoing || this.state.isGoing
-      ?<div className='friends-container'>
-      <h5>Friends going</h5>
-        <img className='profile-img' src={this.state.friendsGoing ?this.state.friendsGoing[0].profileImage :eventItem.friendsGoing[0].profileImage} />
-      </div>
-      :''}
 
     </div>
   )

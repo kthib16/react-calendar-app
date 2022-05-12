@@ -1,21 +1,18 @@
-import logo from './logo.svg';
 import './App.css';
-import React from 'react';
+import * as React from 'react';
 import { Switch, Route, NavLink, Redirect } from 'react-router-dom';
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, setDoc, auth } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, setDoc } from 'firebase/firestore';
 import { getAuth, signOut, signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
-import Home from './pages/Home';
-import MyCalendar from './pages/MyCalendar';
-import CreateEvent from './pages/CreateEvent';
-import NearbyEvents from './pages/NearbyEvents';
-import EventDetails from './pages/EventDetails';
-import EditEvent from './pages/EditEvent';
-import Register from './pages/Register';
-import UserProfile from './pages/UserProfile';
+import { Home }  from './pages/Home';
+import { MyCalendar } from './pages/MyCalendar';
+import { CreateEvent } from './pages/CreateEvent';
+import { NearbyEvents } from './pages/NearbyEvents';
+import { EventDetails }  from './pages/EventDetails';
+import { EditEvent } from './pages/EditEvent';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCBerhVvYqX_oITGaqgzbYhtT01AoprpzE",
+  apiKey: process.env.REACT_APP_FIREBASE_KEY,
   authDomain: "jsr-914-3a79b.firebaseapp.com",
   projectId: "jsr-914-3a79b",
   storageBucket: "jsr-914-3a79b.appspot.com",
@@ -27,9 +24,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db= getFirestore(app);
 
+type State = {
+  events: array
+}
 
-export default class App extends React.Component {
-state = {
+export default class App extends React.Component<{}, State> {
+state: State = {
   events: []
 }
 
@@ -38,13 +38,19 @@ this.getEvents()
 }
 
 
-
-
 getEvents = async () => {
   const eventsCollection = collection(db, 'Events');
   const events = await getDocs(eventsCollection);
   const eventsArr = [];
+  let upcomingEvents = 0;
+
   events.forEach(individualEvent => {
+    if(this.checkDate(individualEvent.data().date)){
+
+      if(this.checkUpcomingEvents(individualEvent.data().date)){
+        upcomingEvents++
+      }
+
     const eachEvent = {
       id: (individualEvent.data().id ? individualEvent.data().id : individualEvent.id),
         date: individualEvent.data().date,
@@ -57,10 +63,12 @@ getEvents = async () => {
         friendsGoing: individualEvent.data().friendsGoing
     }
     eventsArr.push(eachEvent)
+  }
   })
 
   this.setState({
-    events: eventsArr
+    events: eventsArr,
+    upcomingEvents: upcomingEvents
   })
 }
 
@@ -97,7 +105,7 @@ login = () => {
       .then(result => {
         this.setState({
           user:result.user
-        }, () => {this.props.history.push('/my-calendar')})
+        }, () => {this.props.history.push('/')})
       })
 
       .catch(error => console.log('error:', error))
@@ -114,34 +122,40 @@ logout = () => {
   })
 }
 
-// register = async newUser => {
-//     try{
-//       const auth = getAuth();
-//       const data = await createUserWithEmailAndPassword(
-//         auth,
-//         newUser.email,
-//         newUser.password
-//       );
-//       const user = auth.currentUser;
-//       // user.updateProfile({
-//       //   displayName: newUser.displayName ?newUser.displayName :null,
-//       //   photoURL: newUser.photoURL ?newUser.photoURL :null })
-//       //     .then(function() {
-//       //       var displayName = user.displayName;
-//       //       var photoURL = user.photoURL;
-//       //     }, function(error) {
-//       //       console.log('error:', error)
-//       //   });
-//       console.log('user', user)
-//
-//       this.setState({
-//         user: data.user
-//       }, () => this.props.history.push('/'))
-//     } catch(error){
-//
-//       console.log('error:', error)
-//     }
-//   }
+checkUpcomingEvents = date => {
+  const today = new Date();
+  let day = today.getDate().toString();
+  let month = today.getMonth() + 1;
+  month = month.toString()
+  const year = today.getFullYear().toString();
+  let eventDate = date.split('-')
+
+
+  if(eventDate[0] === year && eventDate[1] === month && Math.abs(eventDate[2] - day) <= 7 ){
+      return true
+  }
+}
+
+checkDate = date => {
+  const today = new Date();
+  let day = today.getDate().toString();
+  let month = today.getMonth() + 1;
+  month = month.toString()
+  const year = today.getFullYear().toString();
+  let eventDate = date.split('-')
+
+  if(eventDate[0] < year){
+    return false
+  } else if(eventDate[1] < month){
+    return false
+  } else if (eventDate[1] === month && eventDate[2] < day ){
+    return false
+} else {
+  return true
+  }
+
+
+}
 
 render(){
   return (
@@ -152,15 +166,15 @@ render(){
       ?(<>
         <div className="nav-home">
         <NavLink exact to='/my-calendar'>MY CALENDAR</NavLink>
-        <NavLink exact to='/add-event'>CREATE EVENT</NavLink>
-        <NavLink exact to='/events-near-me'>EVENTS NEAR ME</NavLink>
+        <NavLink exact to='/events-near-me'>          <i className="fas fa-search"></i>
+SEARCH EVENTS</NavLink>
         </div>
 
         <div className='nav-user'>
         <NavLink exact to='/logout'>LOGOUT</NavLink>
         </div>
         <div className='nav-user'>
-            <NavLink exact to='user-profile'><img className='nav-img' src={this.state.user.photoURL} /></NavLink>
+            <img className='nav-img' src={this.state.user.photoURL} alt='User profile'/>
         </div>
         </>
         )
@@ -177,11 +191,18 @@ render(){
       <main>
       <Switch>
       <Route exact path='/'>
-        <Home />
+        <Home
+          state={this.state}
+          upcomingEvents={this.state.upcomingEvents}
+          />
       </Route>
         <Route exact path='/my-calendar'>
           {this.state.user
-          ?<MyCalendar events={this.state.events} removeEvent={this.removeEvent} user={this.state.user}/>
+          ?<MyCalendar
+            upcomingEvents={this.state.upcomingEvents}
+            events={this.state.events}
+            removeEvent={this.removeEvent}
+            user={this.state.user}/>
           : <Redirect to={{pathname: '/login'}} />
         }
         </Route>
@@ -189,9 +210,7 @@ render(){
 
         </Route>
 
-        <Route exact path='/register'>
-          <Register register={this.register}/>
-        </Route>
+
         <Route exact path='/logout' render={()=> this.logout()}>
         </Route>
         <Route exact path='/add-event'>
@@ -209,12 +228,7 @@ render(){
           :<Redirect to={{pathname: '/login'}} />
         }
         </Route>
-        <Route exact path='/user-profile'>
-        {this.state.user
-          ?<UserProfile user={this.state.user}/>
-          :<Redirect to={{pathname: '/login'}} />
-        }
-        </Route>
+
         <Route path='/event/' render={({ location }) =>
 
         this.state.user

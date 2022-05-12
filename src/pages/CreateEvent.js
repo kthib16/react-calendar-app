@@ -1,21 +1,32 @@
-import React, { Component } from 'react';
+import React from 'react';
+import CalendarSelect from '../Components/DatePicker'
 
-export default class CreateEvent extends Component {
+
+export class CreateEvent extends React.Component {
   state = {
   }
 
 handleChange = e =>{
+
+    this.setState({
+      [e.target.name]: e.target.value
+    })
+}
+
+setDate = date => {
+  let formattedDate = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate()
   this.setState({
-    [e.target.name]: e.target.value
+    date: formattedDate
   })
 }
 
 handleSubmit = e => {
   e.preventDefault();
+  let image = (this.state.image ?this.state.image : 'https://www.mplconcierge.com/uploads/demo/event/event-12.jpg')
   const newEventObj = {
     date: this.state.date,
     eventName: this.state.eventName,
-    image: this.state.image,
+    image: image,
     isGoing: true,
     ticketMasterId: null,
     locationCity: this.state.locationCity,
@@ -33,13 +44,16 @@ handleSubmit = e => {
       <div className='form-container'>
       <form>
         <div className='form-group'>
-          <input onChange={this.handleChange} value={this.state.eventName} name="eventName" placeholder="Enter Event Name" className="form-control form-control-lg"/>
+        <label for="eventName">Event Title</label>
+          <input onChange={this.handleChange} value={this.state.eventName} name="eventName" placeholder="Enter event title" className="form-control form-control-lg"/>
         </div>
         <div className='form-row form-group'>
           <div className='col-md-6'>
-            <input onChange={this.handleChange} value={this.state.locationCity} name="locationCity" type="text" placeholder="Enter City" className='form-control' />
+            <label for="locationCity">City</label>
+            <input onChange={this.handleChange} value={this.state.locationCity} name="locationCity" type="text" placeholder="Enter city" className='form-control' />
           </div>
           <div className='col-md-6'>
+          <label for="locationState">State</label>
           <select onChange={this.handleChange} name="locationState" className='form-control'>
                   <option>Select state...</option>
                   <option>Alabama</option>
@@ -96,11 +110,16 @@ handleSubmit = e => {
           </select>
           </div>
         </div>
-        <div className='form-group'>
-          <input onChange={this.handleChange} value={this.state.date} name="date" placeholder="YYYY-MM-DD" className="form-control" />
+        <div className='form-row form-group'>
+        <div className='col-md-6'>
+        <label htmlFor="date">Date</label>
+          <CalendarSelect setDate={this.setDate} />
+          </div>
+
+        <div className='col-md-6'>
+          <label for="image">Event Image</label>
+          <input onChange={this.handleChange} value={this.state.image} name='image' placeholder='Image URL' className="form-control" />
         </div>
-        <div className='form-group'>
-          <input onChange={this.handleChange} value={this.state.image} name='image' placeholder='image url' className="form-control" />
         </div>
         <div >
         <button onClick={this.handleSubmit} type="submit" className="btn btn-primary">Create Event</button>
