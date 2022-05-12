@@ -8,7 +8,7 @@ export class Home extends React.Component {
   render(){
     return (
       <div className='home'>
-      {this.state.user && this.props.upcomingEvents
+      {this.state.user !== null && this.props.upcomingEvents
         ?<UpcomingEvents upcomingEvents={this.props.upcomingEvents} />
         : ''}
       <img className='img-home' src='/logo192.png' alt="My calendar app logo"/>
