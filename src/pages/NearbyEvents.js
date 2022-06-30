@@ -7,9 +7,6 @@ export class NearbyEvents extends React.Component<MyProps, MyState> {
 state = {
   events: []
 }
-
-
-
 getEvents = input => {
 
   const apiUrl = `https://app.ticketmaster.com/discovery/v2/events.json?${input}&apikey=${process.env.REACT_APP_TICKETMASTER_API_KEY}`
@@ -71,9 +68,11 @@ onSubmit = e => {
   let searchParam = ''
   if(this.state.searchQuery === 'ZIP'){
     searchParam = `&postalCode=${this.state.searchInput}`
+    console.log(searchParam)
     this.getEvents(searchParam)
-  } else if(this.state.searchQuery === 'Event Title') {
+  } else if(this.state.searchQuery === 'Keyword') {
     searchParam = `&keyword=${this.state.searchInput}`
+    console.log(searchParam)
     this.getEvents(searchParam)
   } else if(!this.state.searchQuery || this.state.searchQuery === ''){
     alert("Please select a search option from the dropdown menu")
