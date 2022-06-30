@@ -51,6 +51,7 @@ getEvents = async () => {
       if(this.checkUpcomingEvents(individualEvent.data().date)){
         upcomingEvents++
       }
+    // console.log(individualEvent.data().eventName, individualEvent.data().date)
 
     const eachEvent = {
       id: (individualEvent.data().id ? individualEvent.data().id : individualEvent.id),
@@ -125,35 +126,18 @@ logout = () => {
 
 checkUpcomingEvents = date => {
   const today = new Date();
-  let day = today.getDate().toString();
-  let month = today.getMonth() + 1;
-  month = month.toString()
-  const year = today.getFullYear().toString();
-  let eventDate = date.split('-')
-
-
-  if(eventDate[0] === year && eventDate[1] === month && Math.abs(eventDate[2] - day) <= 7 ){
+  let eventDate = new Date(date);
+  let datesDiff = Math.abs(today - eventDate)
+  let diffInDays = Math.ceil(datesDiff / (1000 * 60 * 60 * 24));
+  if(diffInDays <= 7){
       return true
   }
 }
 
 checkDate = date => {
   const today = new Date();
-  let day = today.getDate().toString();
-  let month = today.getMonth() + 1;
-  month = month.toString()
-  const year = today.getFullYear().toString();
-  let eventDate = date.split('-')
-
-  if(eventDate[0] < year){
-    return false
-  } else if(eventDate[1] < month){
-    return false
-  } else if (eventDate[1] === month && eventDate[2] < day ){
-    return false
-} else {
-  return true
-  }
+  let eventDate = new Date(date);
+  return today <= eventDate
 
 
 }
