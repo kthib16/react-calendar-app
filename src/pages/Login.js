@@ -1,58 +1,13 @@
 import * as React from 'react';
 
-export default class Login extends React.Component{
-  state={
-    email: '',
-    password: ''
+const Login = ({ login, loading }) => (
+  <div className='home'>
+    <h1>Sign in</h1>
+    <h5>Sign in with your Google account to view and manage your calendar.</h5>
+    <button type='button' className='btn btn-primary mt-3' onClick={login} disabled={loading}>
+      <i className='fab fa-google'></i> Sign in with Google
+    </button>
+  </div>
+);
 
-  }
-
-  handleChange = e => {
-    this.setState({
-      [e.target.name]: e.target.value
-    })
-  }
-
-  handleSubmit = e => {
-    e.preventDefault();
-    this.props.login(this.state)
-  }
-
-  render() {
-    return(
-      <form onSubmit={this.handleSubmit}>
-              <div>
-                  <input
-                      type="text"
-                      className="form-control my-3"
-                      placeholder="Email"
-                      name="email"
-                      value={this.state.email}
-                      onChange={this.handleChange}
-                  />
-              </div>
-              <div>
-                  <input
-                      type="password"
-                      className="form-control"
-                      placeholder="Password"
-                      name="password"
-                      value={this.state.password}
-                      onChange={this.handleChange}
-                  />
-              </div>
-              <div className="text-center my-3">
-                  <button
-                      type="submit"
-                      className="btn btn-success my-2 w-100"
-                  >
-                      Login
-                  </button>
-              </div>
-              <div className="text-center my-3">
-                  Don't have an account? <a href='/register'>Signup!</a>
-              </div>
-          </form>
-    )
-  }
-}
+export default Login;

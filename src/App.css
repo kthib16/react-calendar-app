@@ -365,3 +365,16 @@ text-align: left;
 .inline-block-elemnt {
   display: inline-block;
 }
+
+/* Header actions that are buttons (log in / log out) styled like the nav links */
+.nav-button {
+  color: white;
+  padding: 0 0.5rem 0 0;
+  vertical-align: baseline;
+}
+
+.nav-button:hover,
+.nav-button:focus {
+  color: white;
+  text-decoration: underline;
+}

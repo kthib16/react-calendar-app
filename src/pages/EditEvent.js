@@ -1,109 +1,97 @@
 import React from 'react';
+import StateSelect from '../Components/StateSelect';
 
-export class EditEvent extends React.Component{
+export class EditEvent extends React.Component {
+  state = {
+    formData: this.props.location.state.eventItem,
+  };
 
-state={
-  formData: this.props.location.state.eventItem
+  handleChange = (e) => {
+    this.setState({
+      formData: {
+        ...this.state.formData,
+        [e.target.name]: e.target.value,
+      },
+    });
+  };
 
-};
+  handleSubmit = (e) => {
+    e.preventDefault();
+    this.props.updateEvent(this.state.formData);
+  };
 
-handleChange= e =>{
-  this.setState({
-    formData: {
-      ...this.state.formData,
-      [e.target.name]: e.target.value
-    }
-  })
-};
+  render() {
+    const { eventName, locationCity, locationState, date, image } = this.state.formData;
 
-handleSubmit = e => {
-  e.preventDefault();
-
-  this.props.updateEvent(this.state.formData);
-};
-
-render(){
-
-    return(
-      <main>
+    return (
       <div className='form-container'>
-      <form >
-        <div className='form-group' >
-          <input onChange={this.handleChange} value={this.state.formData.eventName} name="eventName" placeholder="Enter Event Name" className="form-control form-control-lg"/>
-        </div>
-        <div className="form-row form-group">
-          <div className='col-md-6'>
-            <input onChange={this.handleChange} value={this.state.formData.locationCity} name="locationCity" type="text" placeholder="Enter City" className='form-control' />
+        <form onSubmit={this.handleSubmit}>
+          <div className='form-group'>
+            <label htmlFor='eventName'>Event Title</label>
+            <input
+              id='eventName'
+              name='eventName'
+              value={eventName || ''}
+              onChange={this.handleChange}
+              placeholder='Enter event name'
+              className='form-control form-control-lg'
+              required
+            />
           </div>
-          <div className='col-md-6'>
-          <select onChange={this.handleChange} value={this.state.formData.locationState} name="locationState" className='form-control'>
-                  <option>Alabama</option>
-                  <option>Alaska</option>
-                  <option>Arizona</option>
-                  <option>Arkansas</option>
-                  <option>California</option>
-                  <option>Colorado</option>
-                  <option>Connecticut</option>
-                  <option>Delaware</option>
-                  <option>Florida</option>
-                  <option>Georgia</option>
-                  <option>Hawaii</option>
-                  <option>Idaho</option>
-                  <option>Illinois</option>
-                  <option>Indiana</option>
-                  <option>Iowa</option>
-                  <option>Kansas</option>
-                  <option>Kentucky</option>
-                  <option>Louisiana</option>
-                  <option>Maine</option>
-                  <option>Maryland</option>
-                  <option>Massachusetts</option>
-                  <option>Michigan</option>
-                  <option>Minnesota</option>
-                  <option>Mississippi</option>
-                  <option>Missouri</option>
-                  <option>Montana</option>
-                  <option>Nebraska</option>
-                  <option>Nevada</option>
-                  <option>New Hampshire</option>
-                  <option>New Jersey</option>
-                  <option>New Mexico</option>
-                  <option>New York</option>
-                  <option>North Carolina</option>
-                  <option>North Dakota</option>
-                  <option>Ohio</option>
-                  <option>Oklahoma</option>
-                  <option>Oregon</option>
-                  <option>Pennsylvania</option>
-                  <option>Rhode Island</option>
-                  <option>South Carolina</option>
-                  <option>South Dakota</option>
-                  <option>Tennessee</option>
-                  <option>Texas</option>
-                  <option>Utah</option>
-                  <option>Vermont</option>
-                  <option>Virginia</option>
-                  <option>Washington</option>
-                  <option>West Virginia</option>
-                  <option>Wisconsin</option>
-                  <option>Wyoming</option>
-          </select>
+          <div className='form-row form-group'>
+            <div className='col-md-6'>
+              <label htmlFor='locationCity'>City</label>
+              <input
+                id='locationCity'
+                name='locationCity'
+                type='text'
+                value={locationCity || ''}
+                onChange={this.handleChange}
+                placeholder='Enter city'
+                className='form-control'
+                required
+              />
+            </div>
+            <div className='col-md-6'>
+              <label htmlFor='locationState'>State</label>
+              <StateSelect
+                id='locationState'
+                name='locationState'
+                value={locationState || ''}
+                onChange={this.handleChange}
+                placeholder='Select state...'
+              />
+            </div>
           </div>
-
-        </div>
-        <div className='form-group'>
-          <input onChange={this.handleChange} value={this.state.formData.date} name="date" placeholder="YYYY-MM-DD" className="form-control" />
-        </div>
-        <div className='form-group'>
-          <input onChange={this.handleChange} value={this.state.formData.image} name="image" placeholder="Image url" className="form-control" />
-        </div>
-        <div>
-        <button onClick={this.handleSubmit} type="submit" className="btn btn-primary">Update Event</button>
-        </div>
+          <div className='form-group'>
+            <label htmlFor='date'>Date</label>
+            <input
+              id='date'
+              name='date'
+              value={date || ''}
+              onChange={this.handleChange}
+              placeholder='YYYY-MM-DD'
+              pattern='\d{4}-\d{1,2}-\d{1,2}'
+              title='Use the format YYYY-MM-DD'
+              className='form-control'
+              required
+            />
+          </div>
+          <div className='form-group'>
+            <label htmlFor='image'>Event Image</label>
+            <input
+              id='image'
+              name='image'
+              type='url'
+              value={image || ''}
+              onChange={this.handleChange}
+              placeholder='Image URL'
+              className='form-control'
+            />
+          </div>
+          <button type='submit' className='btn btn-primary'>Update Event</button>
         </form>
-        </div>
-        </main>
-
-    )
+      </div>
+    );
   }
 }

@@ -1,175 +1,134 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
+import { formatEventDate } from '../utils/dates';
 
-export class NearbyEvents extends React.Component<MyProps, MyState> {
+const API_URL = 'https://app.ticketmaster.com/discovery/v2/events.json';
 
+// Maps a Ticketmaster API event to the shape used by the rest of the app.
+export function toEventItem(event) {
+  const venue = event._embedded && event._embedded.venues && event._embedded.venues[0];
+  const images = event.images || [];
+  const image = images[2] || images[0];
 
-state = {
-  events: []
-}
-getEvents = input => {
-
-  const apiUrl = `https://app.ticketmaster.com/discovery/v2/events.json?${input}&apikey=${process.env.REACT_APP_TICKETMASTER_API_KEY}`
-  fetch(apiUrl)
-  .then(response => {
-    return response.json();
-  })
-  .then(parsedResponse => {
-    console.log(parsedResponse)
-    const sortedArr = parsedResponse._embedded.events.sort(function(a,b){return new Date(a.dates.start.dateTime) - new Date(b.dates.start.dateTime)});
-    let eventArr = []
-    console.log(sortedArr)
-    sortedArr.forEach(eventItem => {
-      let date = eventItem.dates.start.localDate.split('-')
-      let month = date[1].split('')
-      if(month[0] === '0'){
-        month = month[1]
-      } else{
-        month = month.join('')
-      }
-
-      date = date[0] + '-' + month + '-' + date[2]
-      const newEventObj={
-          ticketMasterId: eventItem.id,
-          date: eventItem.dates.start.localDate,
-          eventName: eventItem.name,
-          image: eventItem.images[2].url,
-          isGoing: false,
-          locationCity: eventItem._embedded.venues[0].city.name,
-          locationCountry: eventItem._embedded.venues[0].country.name
-
-
-      }
-
-      if(eventItem._embedded.venues[0].state ){
-        newEventObj.locationState = eventItem._embedded.venues[0].state.name
-      }
-
-      eventArr.push(newEventObj)
-  })
-
-  this.setState({
-    events: eventArr
-  })
-
-  })
-  .catch(error=>console.log('error', error))
-
+  return {
+    ticketMasterId: event.id,
+    date: event.dates.start.localDate,
+    eventName: event.name,
+    image: image ? image.url : '',
+    isGoing: false,
+    locationCity: venue && venue.city ? venue.city.name : '',
+    locationCountry: venue && venue.country ? venue.country.name : '',
+    ...(venue && venue.state ? { locationState: venue.state.name } : {}),
+  };
 }
 
-onChange = e => {
-  this.setState({
-    [e.target.name]: e.target.value
-  })
-}
+export class NearbyEvents extends React.Component {
+  state = {
+    events: [],
+    searchInput: '',
+    searchQuery: '',
+    message: null,
+    loading: false,
+  };
 
-onSubmit = e => {
-  e.preventDefault();
-  let searchParam = ''
-  if(this.state.searchQuery === 'ZIP'){
-    searchParam = `&postalCode=${this.state.searchInput}`
-    console.log(searchParam)
-    this.getEvents(searchParam)
-  } else if(this.state.searchQuery === 'Keyword') {
-    searchParam = `&keyword=${this.state.searchInput}`
-    console.log(searchParam)
-    this.getEvents(searchParam)
-  } else if(!this.state.searchQuery || this.state.searchQuery === ''){
-    alert("Please select a search option from the dropdown menu")
-  } else if(!this.state.searchInput || this.state.searchInput === ''){
-    alert("Please enter a search term")
-  }
-}
+  getEvents = async (searchParam) => {
+    this.setState({ loading: true, message: null });
+    const url = `${API_URL}?${searchParam}&apikey=${process.env.REACT_APP_TICKETMASTER_API_KEY}`;
 
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`Ticketmaster responded with ${response.status}`);
+      const data = await response.json();
+      const results = (data._embedded && data._embedded.events) || [];
 
+      const events = results
+        .map(toEventItem)
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
 
+      this.setState({
+        events,
+        loading: false,
+        message: events.length === 0 ? 'No events found. Try a different search.' : null,
+      });
+    } catch (error) {
+      console.error('Event search failed', error);
+      this.setState({ events: [], loading: false, message: 'Something went wrong searching for events. Please try again.' });
+    }
+  };
 
-  render(){
+  onChange = (e) => {
+    this.setState({ [e.target.name]: e.target.value });
+  };
 
-    return(
+  onSubmit = (e) => {
+    e.preventDefault();
+    const { searchQuery, searchInput } = this.state;
+    const term = searchInput.trim();
+
+    if (!searchQuery) {
+      this.setState({ message: 'Please choose ZIP or Keyword from the dropdown.' });
+    } else if (!term) {
+      this.setState({ message: 'Please enter a search term.' });
+    } else {
+      const param = searchQuery === 'ZIP' ? 'postalCode' : 'keyword';
+      this.getEvents(`${param}=${encodeURIComponent(term)}`);
+    }
+  };
+
+  render() {
+    const { events, searchInput, searchQuery, message, loading } = this.state;
+
+    return (
       <div>
-
-      <h4>Nearby Events</h4>
-      <form className="input-group " onSubmit={this.onSubmit}>
-          <input onChange={this.onChange} type="search" name="searchInput" id="form1" className="form-control" placeholder="Search" value={this.state.searchInput}/>
-          <select onChange={this.onChange} name="searchQuery" className='form-control form-select' value={this.state.searchQuery}>
-                  <option>Search by...</option>
-                  <option>ZIP</option>
-                  <option>Keyword</option>
-
+        <h4>Nearby Events</h4>
+        <form className='input-group' onSubmit={this.onSubmit}>
+          <input
+            onChange={this.onChange}
+            type='search'
+            name='searchInput'
+            id='searchInput'
+            className='form-control'
+            placeholder='Search'
+            aria-label='Search term'
+            value={searchInput}
+          />
+          <select
+            onChange={this.onChange}
+            name='searchQuery'
+            className='form-control form-select'
+            aria-label='Search by'
+            value={searchQuery}
+          >
+            <option value=''>Search by...</option>
+            <option value='ZIP'>ZIP</option>
+            <option value='Keyword'>Keyword</option>
           </select>
-
-        <button type="button" className="btn btn-primary" onClick={this.onSubmit}>
-          <i className="fas fa-search"></i>
-        </button>
+          <button type='submit' className='btn btn-primary' aria-label='Search' disabled={loading}>
+            <i className='fas fa-search'></i>
+          </button>
         </form>
-      <div className='container'>
-      {this.state.events
-        ?this.state.events.map(eventItem => {
-        let date = eventItem.date.split('-')
-        let month =''
-        if(date[1] === '01') {
-          month = 'January'
-        }
-        else if(date[1] === '02'){
-          month='February'
-        }
-        else if(date[1] === '03'){
-          month='March'
-        }
-        else if(date[1] === '04'){
-          month='April'
-        }
-        else if(date[1] === '05'){
-          month='May'
-        }
-        else if(date[1] === '06'){
-          month='June'
-        }
-        else if(date[1] === '07'){
-          month='July'
-        }
-        else if(date[1] === '08'){
-          month='August'
-        }
-        else if(date[1] === '09'){
-          month='September'
-        }
-        else if(date[1] === '10'){
-          month='October'
-        }
-        else if(date[1] === '11'){
-          month='November'
-        }
-        else if(date[1] === '12'){
-          month='December'
-        }
 
+        {message && <p className='mt-3' role='status'>{message}</p>}
 
-          return(
-                <div key={eventItem.id}  className="card overflow-auto">
-                <Link to={{pathname: `/event/${eventItem.ticketMasterId}`, state: { eventItem: eventItem } } } >
-
-                  <img className="card-img-top" src={eventItem.image} alt={eventItem.eventName} />
-                  <div className="card-body">
-                    <h5 className="card-title">{eventItem.eventName}</h5>
-                    <p className="card-text">{month} {date[2]}, {date[0]}</p>
-
-                    {eventItem.locationState
-                      ?<p className="card-text">{eventItem.locationCity}, {eventItem.locationState}</p>
-                      :<p className="card-text">{eventItem.locationCity}, {eventItem.locationCountry}</p>
-
-                    }
-                  </div>
+        <div className='container'>
+          {events.map((eventItem) => (
+            <div key={eventItem.ticketMasterId} className='card overflow-auto'>
+              <Link to={{ pathname: `/event/${eventItem.ticketMasterId}`, state: { eventItem } }}>
+                {eventItem.image && (
+                  <img className='card-img-top' src={eventItem.image} alt={eventItem.eventName} />
+                )}
+                <div className='card-body'>
+                  <h5 className='card-title'>{eventItem.eventName}</h5>
+                  <p className='card-text'>{formatEventDate(eventItem.date)}</p>
+                  <p className='card-text'>
+                    {eventItem.locationCity}, {eventItem.locationState || eventItem.locationCountry}
+                  </p>
+                </div>
               </Link>
-              </div>
-                )
-          })
-        : ''
-        }
+            </div>
+          ))}
+        </div>
       </div>
-      </div>
-    )}
-
-
+    );
+  }
 }

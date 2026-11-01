@@ -1,70 +1,134 @@
-# Getting Started with Create React App
+# My Calendar
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+[![CI](https://github.com/kthib16/react-calendar-app/actions/workflows/ci.yml/badge.svg)](https://github.com/kthib16/react-calendar-app/actions/workflows/ci.yml)
 
-## Available Scripts
+An event calendar built with React and Firebase. Sign in with Google, search for events through the Ticketmaster Discovery API, save them to your calendar, and create your own events.
 
-In the project directory, you can run:
+![Welcome screen](docs/screenshots/welcome.png)
 
-### `npm start`
+## Features
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- **Google sign-in** with Firebase Authentication. The session is restored on refresh, and calendar pages are only available to signed-in users.
+- **Personal calendar** listing the events you are attending, soonest first, with a banner showing how many fall in the next seven days.
+- **Event search** by ZIP code or keyword using the Ticketmaster Discovery API, with loading, empty and error states.
+- **Create, edit and delete events**, stored in Cloud Firestore. Events from Ticketmaster can be added to your calendar with one click.
+- **Event details** pulling live information (link, venue) from Ticketmaster for events that came from search.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+![Event search](docs/screenshots/nearby-events.png)
 
-### `npm test`
+## Tech stack
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+| Area | Tools |
+| --- | --- |
+| UI | React 17, React Router 5, Bootstrap 4, react-datepicker |
+| Data and auth | Cloud Firestore, Firebase Authentication (Google provider) |
+| External API | Ticketmaster Discovery API |
+| Testing | Jest and React Testing Library |
+| Tooling | Create React App (react-scripts 5), GitHub Actions |
 
-### `npm run build`
+## Getting started
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Prerequisites
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- Node.js 16 or later (`.nvmrc` pins 18)
+- A Firebase project with **Authentication** (Google provider enabled) and **Cloud Firestore**
+- A free [Ticketmaster developer](https://developer.ticketmaster.com/) API key
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Setup
 
-### `npm run eject`
+```bash
+git clone https://github.com/kthib16/react-calendar-app.git
+cd react-calendar-app
+npm install
+cp .env.example .env     # then add your keys
+npm start                # http://localhost:3000
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+| Variable | Description |
+| --- | --- |
+| `REACT_APP_FIREBASE_KEY` | Web API key of your Firebase project |
+| `REACT_APP_TICKETMASTER_API_KEY` | Ticketmaster Discovery API key |
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+The remaining Firebase settings (project ID, auth domain and so on) are in `src/firebase.js`. They identify the project and are not secrets, but you will want to replace them with the values from your own Firebase project settings.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+Without `REACT_APP_FIREBASE_KEY` the app still loads and shows a message explaining what is missing.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+### Firestore
 
-## Learn More
+Events live in a single `Events` collection. For development, rules that allow signed-in users to read and write are enough:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /Events/{event} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+These rules are intentionally simple. See [Known limitations](#known-limitations) before using anything like this in production.
 
-### Code Splitting
+### Scripts
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+| Command | Description |
+| --- | --- |
+| `npm start` | Run the app in development |
+| `npm test` | Run the test suite in watch mode (`CI=true npm test` runs once) |
+| `npm run build` | Create a production build in `build/` |
 
-### Analyzing the Bundle Size
+## Project structure
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+```
+src/
+  App.js              Routing, auth state and Firestore reads/writes
+  firebase.js         Firebase initialisation
+  constants.js        Default event image and avatar
+  Components/         Reusable pieces: EventItem, UpcomingEvents, DatePicker, StateSelect
+  pages/              Route-level screens: Home, Login, MyCalendar, CreateEvent,
+                      EditEvent, EventDetails, NearbyEvents
+  utils/dates.js      Date parsing, formatting and "upcoming" logic (unit tested)
+  data/states.js      State list for the event forms
+```
 
-### Making a Progressive Web App
+### Data model
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Each document in `Events` looks like this:
 
-### Advanced Configuration
+```js
+{
+  eventName: 'Jazz Night',
+  date: '2026-11-20',                  // YYYY-MM-DD
+  locationCity: 'New Orleans',
+  locationState: 'Louisiana',
+  image: 'https://…',
+  ticketMasterId: 'vvG1…' | null,      // set when the event came from Ticketmaster
+  isGoing: true,
+  friendsGoing: [{ userName: 'me@example.com', profileImage: 'https://…' }]
+}
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## Testing
 
-### Deployment
+The suite covers the date utilities, the event list and alert components, the Ticketmaster response mapping, and the app shell (signed-out view, redirects for protected pages, signed-in navigation, and error handling). Firebase is mocked, so no credentials are needed.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+```bash
+CI=true npm test
+```
 
-### `npm run build` fails to minify
+GitHub Actions runs the tests and a production build on every push and pull request.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## Known limitations
+
+- **Shared event collection.** The app loads every event and filters by attendee in the browser. That is fine for a demo, but a production version would query per user and enforce ownership in Firestore security rules.
+- **Client-side API keys.** Create React App embeds `REACT_APP_*` values in the bundle, so the Ticketmaster key is visible to anyone using the site. Restrict it in the Ticketmaster dashboard or proxy requests through a small server.
+- **No Firebase integration tests.** Reads and writes are exercised through mocks, not against the Firebase emulator.
+- **Friends are placeholders.** `friendsGoing` records attendees, but there is no friend-management UI yet.
+
+## Possible next steps
+
+- Query events per user and tighten the Firestore rules
+- Test against the Firebase Local Emulator Suite
+- Move class components to function components with hooks
+- Add a month view to the calendar
